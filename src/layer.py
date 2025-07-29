@@ -1,49 +1,54 @@
-from typing import List
-
+from typing import Optional
 import numpy as np
-from connection import Connection
-from neuron import Neuron
-
 
 class Layer:
-    def __init__(self, size: int = 0):
-        self.nodes: List[Neuron] = []
-        if size > 0:
-            self.create_neurons(size)
+    def __init__(self, size: int):
+        if size <= 0:
+            raise ValueError("Layer size must be a positive integer.")
 
-    def add_node(self, node: Neuron):
-        self.nodes.append(node)
+        self.size = size
+        self.values = np.zeros(size)
+        self.biases = np.random.uniform(-0.5, 0.5, size)
+        self.next_layer = None
 
-    def connect_to(self, other_layer: 'Layer'):
-        for node in self.nodes:
-            for other_node in other_layer.nodes:
-                conn = Connection(node, other_node)
-                node.add_outgoing_connection(conn)
-                other_node.add_incoming_connection(conn)
+    def connect_to(self, next_layer: 'Layer'):
+        self.next_layer = next_layer
+        next_layer.set_weights(np.random.uniform(-0.5, 0.5, (next_layer.size, self.size)))
 
-    def create_neurons(self, count: int):
-        for _ in range(count):
-            self.add_node(Neuron())
-
-    def feed_data(self, data: np.array):
+    def load_data(self, data: np.array):
         flattened_data = data.flatten()
-        if len(flattened_data) != len(self.nodes):
-            raise ValueError("Data length must match the number of nodes in the layer.")
+        if len(flattened_data) != self.size:
+            raise ValueError(f"Data length ({len(flattened_data)}) must match layer size ({self.size})")
 
-        for node, value in zip(self.nodes, flattened_data):
-            node.value = value
+        self.values = flattened_data.copy()
 
-    def feed_forward(self):
-        for node in self.nodes:
-            node.calculate_output()
+    def forward(self, input_values: Optional[np.array] = None):
+        if input_values is not None and self.weights is not None:
+            # Apply weights and biases, then activation
+            linear_output = self.weights @ input_values + self.biases
+            self.values = self._activation_function(linear_output)
 
-        for node in self.nodes:
-            node.feed_forward()
+        # Trigger next layer's forward pass if connected
+        if self.next_layer is not None:
+            self.next_layer.forward(self.values)
+
+    def _activation_function(self, x: np.ndarray) -> np.ndarray:
+        return 1 / (1 + np.exp(-x))
+
+    def set_weights(self, weights: np.ndarray):
+        if weights.ndim != 2:
+            raise ValueError("Weights must be a 2D array")
+        if weights.shape[0] != self.size:
+            raise ValueError(f"Weight matrix first dimension ({weights.shape[0]}) must match layer size ({self.size})")
+        self.weights = weights.copy()
 
     def print_state(self):
-        for i, node in enumerate(self.nodes):
-            print(f"Node {i}: {node}")
+        print(f"Layer values: {self.values}")
+        if self.weights is not None:
+            print(f"Weights shape: {self.weights.shape}")
+            print(f"Biases: {self.biases}")
 
     def __repr__(self):
-        return f"Layer(size={len(self.nodes)})"
+        weight_info = f", weights_shape={self.weights.shape}" if self.weights is not None else ""
+        return f"Layer(size={self.size}{weight_info})"
 
