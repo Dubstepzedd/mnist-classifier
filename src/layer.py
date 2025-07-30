@@ -22,7 +22,7 @@ class Layer:
 
         self.values = flattened_data.copy()
 
-    def forward(self, input_values: Optional[np.array] = None):
+    def forward(self, input_values: Optional[np.ndarray] = None):
         if input_values is not None and self.weights is not None:
             # Apply weights and biases, then activation
             linear_output = self.weights @ input_values + self.biases
