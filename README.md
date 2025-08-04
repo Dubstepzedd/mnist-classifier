@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a basic implementation of a **Perceptron neural network** to classify MNIST digits. The goal of this project is educational — to gain a better understanding of the fundamental building blocks of neural networks, particularly how **Perceptrons** function, before moving on to more advanced architectures like **Convolutional Neural Networks (CNNs)**.
+This is a basic implementation of a **multilayer perceptron neural network** to classify MNIST digits. The goal of this project is educational — to gain a better understanding of the fundamental building blocks of neural networks, particularly how **mulilayer perceptron** function and trains using backpropagation, before moving on to more advanced architectures like **Convolutional Neural Networks (CNNs)**.
 
 ---
 
@@ -31,7 +31,11 @@ uv run main.py
 
 Performance metrics (accuracy, precision, recall, etc.) will be posted here as the model improves.
 
-*Current status:* Training and evaluation in progress.
+*Status (2025-08-04)*:
+When doing batches of 32, with a learning rate of 0.1 and a layered neural network accoring to:
+```784 neurons -> 32 neurons -> 32 neurons -> 10 neurons```
+
+,we achieve an accuracy of **92%**. To reach this accuracy I had to use softmax and change the loss function to cross entropy. The weights for this is included in the ```/data``` folder.
 
 ## Goals of the Project
 
